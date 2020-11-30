@@ -1,4 +1,7 @@
-# autows201_demo
+# autows201-start
+
+
+## This repository is used as the foundation for the Automation 201 Workshop.  It is not functional in the starting state.  Attendees will 'fill in the gaps' during the workshop. 
 
 Before you use this repository, please follow the pre-requisites:
 
