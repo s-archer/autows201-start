@@ -24,13 +24,13 @@ This deployment will build the following components:
 
 <img src="./images/deploy_diagram.png">
 
-To deploy the infrastructure, you can:
+To deploy the BIG-IP infrastructure, you can:
 -   cd ./terraform
 -   terraform init
 -   terraform plan
 -   terraform apply
 
-optionally, you can deploy the FAST declaration:
+optionally, you can deploy the FAST (F5 AS3 Templates) declaration (after the BIG-IP infrastructure deployment is complete):
 -   cd ../fast
 -   terraform init
 -   terraform plan
