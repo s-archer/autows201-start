@@ -55,7 +55,7 @@ resource "aws_launch_configuration" "nginx" {
 
   security_groups      = [aws_security_group.nginx.id]
   key_name             = aws_key_pair.demo.key_name
-  user_data            = file("../scripts/nginx.sh")
+  user_data            = file("./scripts/nginx.sh")
   iam_instance_profile = aws_iam_instance_profile.consul.name
 
 
