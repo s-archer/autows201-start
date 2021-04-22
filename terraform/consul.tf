@@ -15,7 +15,7 @@ resource "aws_instance" "consul" {
 }
 
 resource "aws_iam_role_policy" "consul" {
-  name = "f5-consul-policy"
+  name = "${var.prefix}f5-consul-policy"
   role = aws_iam_role.consul.id
 
   policy = <<EOF
@@ -37,7 +37,7 @@ EOF
 }
 
 resource "aws_iam_role" "consul" {
-  name = "f5-consul-role"
+  name = "${var.prefix}f5-consul-role"
 
   assume_role_policy = <<EOF
 {
@@ -57,6 +57,6 @@ EOF
 }
 
 resource "aws_iam_instance_profile" "consul" {
-  name = "consul_sd"
+  name = "${var.prefix}consul_sd"
   role = aws_iam_role.consul.name
 }
