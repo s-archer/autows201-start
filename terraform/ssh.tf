@@ -13,11 +13,11 @@ resource "null_resource" "key" {
   }
 
   provisioner "local-exec" {
-    command = "chmod 600 ssh-key.pem"
+    command = "chmod 600 *.pem"
   }
 
   provisioner "local-exec" {
     when    = destroy
-    command = "rm -f ssh-key.pem"
+    command = "rm -f *.pem"
   }
 }

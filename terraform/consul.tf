@@ -4,7 +4,7 @@ resource "aws_instance" "consul" {
   private_ip             = "10.0.2.100"
   subnet_id              = module.vpc.public_subnets[1]
   vpc_security_group_ids = [aws_security_group.consul.id]
-  user_data              = file("./scripts/consul.sh")
+  user_data              = file("../scripts/consul.sh")
   iam_instance_profile   = aws_iam_instance_profile.consul.name
   key_name               = aws_key_pair.demo.key_name
   tags = {
@@ -15,7 +15,7 @@ resource "aws_instance" "consul" {
 }
 
 resource "aws_iam_role_policy" "consul" {
-  name = "${var.prefix}f5-consul-policy"
+  name = "${var.prefix}consul"
   role = aws_iam_role.consul.id
 
   policy = <<EOF
@@ -37,7 +37,7 @@ EOF
 }
 
 resource "aws_iam_role" "consul" {
-  name = "${var.prefix}f5-consul-role"
+  name = "${var.prefix}consul"
 
   assume_role_policy = <<EOF
 {
@@ -57,6 +57,6 @@ EOF
 }
 
 resource "aws_iam_instance_profile" "consul" {
-  name = "${var.prefix}consul_sd"
+  name = "${var.prefix}consul"
   role = aws_iam_role.consul.name
 }

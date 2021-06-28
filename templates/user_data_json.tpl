@@ -3,43 +3,7 @@
 mkdir -p /config/cloud
 cat << 'EOF' > /config/cloud/runtime-init-conf.yaml
 {
-    "runtime_parameters": [
-        {
-            "name": "HOST_NAME",
-            "type": "static",
-            "value": "${hostname}"
-        },
-        {
-            "name": "ADMIN_PASS",
-            "type": "static",
-            "value": "${admin_pass}"
-        },
-        {
-            "name": "EXTERNAL_IP",
-            "type": "static",
-            "value": "${external_ip}"
-        },
-        {
-            "name": "INTERNAL_IP",
-            "type": "static",
-            "value": "${internal_ip}"
-        },
-        {
-            "name": "INTERNAL_GW",
-            "type": "static",
-            "value": "${internal_gw}"
-        },
-        {
-            "name": "VS1_IP",
-            "type": "static",
-            "value": "${vs1_ip}"
-        },
-        {
-            "name": "CONSUL_URI",
-            "type": "static",
-            "value": "${consul_uri}"
-        }
-    ],
+    "runtime_parameters": [],
     "pre_onboard_enabled": [
         {
             "name": "provision_rest",
@@ -77,12 +41,127 @@ cat << 'EOF' > /config/cloud/runtime-init-conf.yaml
             {
                 "extensionType": "do",
                 "type": "inline",
-                "value": ${do_declaration}
+                "value":               { 
+                    "schemaVersion": "1.15.0",
+                    "class": "Device",
+                    "async": true,
+                    "label": "my BIG-IP declaration for declarative onboarding",
+                    "Common": {
+                        "class": "Tenant",
+                        "hostname": "${ hostname }",
+                        "admin": {
+                            "class": "User",
+                            "userType": "regular",
+                            "password": "${ admin_pass }",
+                            "shell": "bash"
+                        },
+                        "myDns": {
+                            "class": "DNS",
+                            "nameServers": [
+                                "8.8.8.8"
+                            ]
+                        },
+                        "myNtp": {
+                            "class": "NTP",
+                            "servers": [
+                                "0.pool.ntp.org"
+                            ],
+                            "timezone": "UTC"
+                        },
+                        "myProvisioning": {
+                            "class": "Provision",
+                            "ltm": "nominal"
+                        },
+                        "external": {
+                            "class": "VLAN",
+                            "tag": 1001,
+                            "mtu": 1500,
+                            "interfaces": [
+                                {
+                                    "name": 1.1,
+                                    "tagged": false
+                                }
+                            ]
+                        },
+                        "external-self": {
+                            "class": "SelfIp",
+                            "address": "${ external_ip }",
+                            "vlan": "external",
+                            "allowService": "none",
+                            "trafficGroup": "traffic-group-local-only"
+                        },
+                        "internal": {
+                            "class": "VLAN",
+                            "tag": 1002,
+                            "mtu": 1500,
+                            "interfaces": [
+                                {
+                                    "name": 1.2,
+                                    "tagged": false
+                                }
+                            ]
+                        },
+                        "internal-self": {
+                            "class": "SelfIp",
+                            "address": "${ internal_ip }",
+                            "vlan": "internal",
+                            "allowService": "default",
+                            "trafficGroup": "traffic-group-local-only"
+                        },
+                        "dbvars": {
+                            "class": "DbVariables",
+                            "provision.extramb": 500,
+                            "restjavad.useextramb": true
+                        }
+                    }
+                }
             },
             {
                 "extensionType": "as3",
                 "type": "inline",
-                "value": ${as3_declaration}
+                "value":                 {
+                    "class": "AS3",
+                    "action": "deploy",
+                    "persist": true,
+                    "declaration": {
+                        "class": "ADC",
+                        "schemaVersion": "3.22.0",
+                        "label": "Sample 1",
+                        "remark": "Simple HTTP Service with Round-Robin Load Balancing",
+                        "Sample_01": {
+                            "class": "Tenant",
+                            "A1": {
+                                "class": "Application",
+                                "template": "http",
+                                "serviceMain": {
+                                    "class": "Service_HTTP",
+                                    "virtualAddresses": [
+                                        "${ vs1_ip }"
+                                    ],
+                                    "persistenceMethods": [],
+                                    "profileMultiplex": {
+                                        "bigip": "/Common/oneconnect"
+                                    },
+                                    "pool": "web_pool"
+                                },
+                                "web_pool": {
+                                    "class": "Pool",
+                                    "monitors": [
+                                        "http"
+                                    ],
+                                    "members": [
+                                        {
+                                            "servicePort": 80,
+                                            "addressDiscovery": "consul",
+                                            "updateInterval": 10,
+                                            "uri": "${ consul_uri }"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
             }
         ]
     }

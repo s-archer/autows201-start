@@ -1,6 +1,6 @@
 variable "f5_ami_search_name" {
   description = "filter used to find AMI for deployment"
-  default     = "F5*BIGIP-15.1.1*Best*25Mbps*"
+  default     = "F5*BIGIP-15.1.2.1*Best*25Mbps*"
 }
 
 variable "prefix" {
