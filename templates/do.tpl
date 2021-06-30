@@ -5,11 +5,11 @@
                     "label": "my BIG-IP declaration for declarative onboarding",
                     "Common": {
                         "class": "Tenant",
-                        "hostname": "{{{ HOST_NAME }}}",
+                        "hostname": "${ hostname }",
                         "admin": {
                             "class": "User",
                             "userType": "regular",
-                            "password": "{{{ ADMIN_PASS }}}",
+                            "password": "${ admin_pass }",
                             "shell": "bash"
                         },
                         "myDns": {
@@ -42,7 +42,7 @@
                         },
                         "external-self": {
                             "class": "SelfIp",
-                            "address": "{{{ EXTERNAL_IP }}}",
+                            "address": "${ external_ip }",
                             "vlan": "external",
                             "allowService": "none",
                             "trafficGroup": "traffic-group-local-only"
@@ -60,7 +60,7 @@
                         },
                         "internal-self": {
                             "class": "SelfIp",
-                            "address": "{{{ INTERNAL_IP }}}",
+                            "address": "${ internal_ip }",
                             "vlan": "internal",
                             "allowService": "default",
                             "trafficGroup": "traffic-group-local-only"

@@ -15,7 +15,7 @@
                                 "serviceMain": {
                                     "class": "Service_HTTP",
                                     "virtualAddresses": [
-                                        "{{{ VS1_IP }}}"
+                                        "${ vs1_ip }"
                                     ],
                                     "persistenceMethods": [],
                                     "profileMultiplex": {
@@ -33,7 +33,7 @@
                                             "servicePort": 80,
                                             "addressDiscovery": "consul",
                                             "updateInterval": 10,
-                                            "uri": "{{{ CONSUL_URI }}}"
+                                            "uri": "${ consul_uri }"
                                         }
                                     ]
                                 }

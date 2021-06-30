@@ -69,7 +69,6 @@ resource "aws_security_group" "public" {
   }
 }
 
-
 resource "aws_security_group" "nginx" {
   name   = "nginx"
   vpc_id = module.vpc.vpc_id
