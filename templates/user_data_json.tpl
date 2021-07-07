@@ -18,21 +18,19 @@ cat << 'EOF' > /config/cloud/runtime-init-conf.yaml
         "install_operations": [
             {
                 "extensionType": "do",
-                "extensionVersion": "1.15.0"
+                "extensionVersion": "1.21.1"
             },
             {
                 "extensionType": "as3",
-                "extensionVersion": "3.22.1"
+                "extensionVersion": "3.26.1"
             },
             {
                 "extensionType": "cf",
-                "extensionVersion": "1.5.0"
+                "extensionVersion": "1.9.0"
             },
             {
-                "extensionType": "ilx",
-                "extensionUrl": "https://github.com/F5Networks/f5-appsvcs-templates/releases/download/v1.3.0/f5-appsvcs-templates-1.3.0-1.noarch.rpm",
-                "extensionVersion": "1.3.0",
-                "extensionVerificationEndpoint": "/mgmt/shared/fast/info"
+                "extensionType": "fast",
+                "extensionVersion": "1.10.0"
             }
         ]
     },
@@ -168,6 +166,6 @@ cat << 'EOF' > /config/cloud/runtime-init-conf.yaml
 }
 EOF
 
-curl https://cdn.f5.com/product/cloudsolutions/f5-bigip-runtime-init/v1.0.0/dist/f5-bigip-runtime-init-1.0.0-1.gz.run -o f5-bigip-runtime-init-1.0.0-1.gz.run && bash f5-bigip-runtime-init-1.0.0-1.gz.run -- '--cloud aws'
+curl https://cdn.f5.com/product/cloudsolutions/f5-bigip-runtime-init/v1.2.1/dist/f5-bigip-runtime-init-1.2.1-1.gz.run -o f5-bigip-runtime-init-1.2.1-1.gz.run && bash f5-bigip-runtime-init-1.2.1-1.gz.run -- '--cloud aws'
 
 f5-bigip-runtime-init --config-file /config/cloud/runtime-init-conf.yaml
