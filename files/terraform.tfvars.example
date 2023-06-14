@@ -1,0 +1,7 @@
+access_key_id      = "access-key"
+f5_ami_search_name = "F5*BIGIP-16*Best*25Mbps*"
+prefix             = "my-autows201-tf"
+region             = "eu-west-2"
+secret_access_key  = "my-secret"
+tenant_name        = "terraform_as3"
+uk_se_name         = "my-name"
