@@ -13,22 +13,23 @@ resource "aws_network_interface" "public" {
 resource "aws_network_interface" "private" {
   subnet_id   = module.vpc.private_subnets[0]
   private_ips = ["10.0.3.10"]
+  security_groups = [aws_security_group.public.id]
 }
-
+ 
 resource "aws_eip" "mgmt" {
-  vpc                       = true
+  domain                    = "vpc"
   network_interface         = aws_network_interface.mgmt.id
   associate_with_private_ip = "10.0.1.10"
 }
 
 resource "aws_eip" "public-self" {
-  vpc                       = true
+  domain                    = "vpc"
   network_interface         = aws_network_interface.public.id
   associate_with_private_ip = "10.0.2.10"
 }
 
 resource "aws_eip" "public-vs1" {
-  vpc                       = true
+  domain                    = "vpc"
   network_interface         = aws_network_interface.public.id
   associate_with_private_ip = "10.0.2.101"
 }
@@ -57,12 +58,16 @@ resource "aws_instance" "f5" {
   key_name      = aws_key_pair.demo.key_name
   user_data     = templatefile("../templates/user_data_json.tpl", {
     hostname        = "mybigip.f5.com",
+    region          = var.region,
     admin_pass      = random_string.password.result,
     external_ip     = "${aws_eip.public-self.private_ip}/24",
     internal_ip     = "${aws_network_interface.private.private_ip}/24",
     internal_gw     = cidrhost(module.vpc.private_subnets_cidr_blocks[0], 1)
     vs1_ip          = aws_eip.public-vs1.private_ip,
-    consul_uri      = "http://${aws_instance.consul.private_ip}:8500/v1/catalog/service/nginx"
+    package_url     = "https://cdn.f5.com/product/cloudsolutions/f5-bigip-runtime-init/v1.6.1/dist/f5-bigip-runtime-init-1.6.1-1.gz.run",
+    access_key_id     = var.access_key_id,
+    secret_access_key = var.secret_access_key,
+    asg_tag           = format("%s-nginx-asg", var.prefix)
   })
 
   network_interface {
@@ -103,7 +108,6 @@ resource "aws_instance" "f5" {
 #     internal_ip     = "${aws_network_interface.private.private_ip}/24",
 #     internal_gw     = cidrhost(module.vpc.private_subnets_cidr_blocks[0], 1)
 #     vs1_ip          = aws_eip.public-vs1.private_ip,
-#     consul_uri      = "http://${aws_instance.consul.private_ip}:8500/v1/catalog/service/nginx"
 #   }
 # }
 
@@ -115,7 +119,6 @@ resource "aws_instance" "f5" {
 #     internal_ip     = "${aws_network_interface.private.private_ip}/24",
 #     internal_gw     = cidrhost(module.vpc.private_subnets_cidr_blocks[0], 1)
 #     vs1_ip          = aws_eip.public-vs1.private_ip,
-#     consul_uri      = "http://${aws_instance.consul.private_ip}:8500/v1/catalog/service/nginx"
 #   })
 #   filename = "${path.module}/user_data_debug.json"
 # }

@@ -12,7 +12,7 @@ resource "aws_security_group" "mgmt" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["${data.http.myip.body}/32"]
+    cidr_blocks = ["${data.http.myip.response_body}/32"]
     #cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -21,7 +21,7 @@ resource "aws_security_group" "mgmt" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["${data.http.myip.body}/32"]
+    cidr_blocks = ["${data.http.myip.response_body}/32"]
     #cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -34,6 +34,7 @@ resource "aws_security_group" "mgmt" {
 
   tags = {
     Name = "mgmt"
+    user = var.uk_se_name
   }
 }
 
@@ -66,6 +67,7 @@ resource "aws_security_group" "public" {
   }
   tags = {
     Name = "external"
+    user = var.uk_se_name
   }
 }
 
@@ -91,7 +93,7 @@ resource "aws_security_group" "nginx" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["${chomp(data.http.myip.body)}/32"]
+    cidr_blocks = ["${chomp(data.http.myip.response_body)}/32"]
     #cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -125,44 +127,7 @@ resource "aws_security_group" "nginx" {
 
   tags = {
     Name = "nginx"
+    user = var.uk_se_name
   }
 
-}
-
-resource "aws_security_group" "consul" {
-  name   = "consul"
-  vpc_id = module.vpc.vpc_id
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16", "${chomp(data.http.myip.body)}/32"]
-    #cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 8500
-    to_port     = 8500
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16", "${chomp(data.http.myip.body)}/32"]
-    #cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 8300
-    to_port     = 8301
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  tags = {
-    Name = "consul"
-  }
 }

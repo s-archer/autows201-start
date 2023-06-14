@@ -4,11 +4,12 @@
 # .tfstate files
 *.tfstate
 *.tfstate.*
+*.lock.*
+*.tfvars
 
 # RSA Keys
 *.pem
 *.key
-
 
 # Crash log files
 crash.log

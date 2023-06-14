@@ -8,5 +8,6 @@ module "vpc" {
   tags = {
     Terraform   = "true"
     Environment = "dev"
+    user        = var.uk_se_name
   }
 }

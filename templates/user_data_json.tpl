@@ -9,7 +9,7 @@ cat << 'EOF' > /config/cloud/runtime-init-conf.yaml
             "name": "provision_rest",
             "type": "inline",
             "commands": [
-                "/usr/bin/setdb provision.extramb 500",
+                "/usr/bin/setdb provision.extramb 512",
                 "/usr/bin/setdb restjavad.useextramb true"
             ]
         }
@@ -18,11 +18,11 @@ cat << 'EOF' > /config/cloud/runtime-init-conf.yaml
         "install_operations": [
             {
                 "extensionType": "do",
-                "extensionVersion": "1.21.1"
+                "extensionVersion": "1.22.0"
             },
             {
                 "extensionType": "as3",
-                "extensionVersion": "3.26.1"
+                "extensionVersion": "3.45.0"
             },
             {
                 "extensionType": "cf",
@@ -108,7 +108,7 @@ cat << 'EOF' > /config/cloud/runtime-init-conf.yaml
                         },
                         "dbvars": {
                             "class": "DbVariables",
-                            "provision.extramb": 500,
+                            "provision.extramb": 512,
                             "restjavad.useextramb": true
                         }
                     }
@@ -126,7 +126,7 @@ cat << 'EOF' > /config/cloud/runtime-init-conf.yaml
                         "schemaVersion": "3.22.0",
                         "label": "Sample 1",
                         "remark": "Simple HTTP Service with Round-Robin Load Balancing",
-                        "Sample_01": {
+                        "demo_tenant": {
                             "class": "Tenant",
                             "A1": {
                                 "class": "Application",
@@ -150,9 +150,15 @@ cat << 'EOF' > /config/cloud/runtime-init-conf.yaml
                                     "members": [
                                         {
                                             "servicePort": 80,
-                                            "addressDiscovery": "consul",
-                                            "updateInterval": 10,
-                                            "uri": "${ consul_uri }"
+                                            "addressDiscovery": "aws",
+                                            "updateInterval": 1,
+                                            "tagKey": "Name",
+                                            "tagValue": "${asg_tag}",
+                                            "addressRealm": "private",
+                                            "region": "${region}",
+                                            "undetectableAction": "disable",
+                                            "accessKeyId": "${access_key_id}",
+                                            "secretAccessKey": "${secret_access_key}"
                                         }
                                     ]
                                 }

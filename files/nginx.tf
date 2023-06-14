@@ -15,7 +15,7 @@ data "aws_ami" "ubuntu" {
 }
 
 resource "aws_autoscaling_group" "nginx" {
-  name                 = "nginx-asg"
+  name                 = format("%s-nginx-asg", var.prefix)
   launch_configuration = aws_launch_configuration.nginx.name
   desired_capacity     = 2
   min_size             = 1
@@ -27,28 +27,25 @@ resource "aws_autoscaling_group" "nginx" {
     create_before_destroy = true
   }
 
-  tags = [
-    {
+  tag {
       key                 = "Name"
-      value               = "nginx-autoscale"
+      value               = format("%s-nginx-asg", var.prefix)
       propagate_at_launch = true
-    },
-    {
+  }
+  tag {
       key                 = "Env"
       value               = "consul"
       propagate_at_launch = true
-    },
-    {
+  }
+  tag {
       key                 = "UK-SE"
-      value               = "arch"
+      value               = var.uk_se_name
       propagate_at_launch = true
-    }
-  ]
-
+  }
 }
 
 resource "aws_launch_configuration" "nginx" {
-  name_prefix                 = "nginx-"
+  name_prefix                 = format("%s-nginx-", var.prefix)
   image_id                    = data.aws_ami.ubuntu.id
   instance_type               = "t2.micro"
   associate_public_ip_address = false
@@ -56,7 +53,7 @@ resource "aws_launch_configuration" "nginx" {
   security_groups      = [aws_security_group.nginx.id]
   key_name             = aws_key_pair.demo.key_name
   user_data            = file("../scripts/nginx.sh")
-  iam_instance_profile = aws_iam_instance_profile.consul.name
+  iam_instance_profile = aws_iam_instance_profile.nginx.name
 
 
   lifecycle {
@@ -65,9 +62,9 @@ resource "aws_launch_configuration" "nginx" {
 }
 
 resource "aws_eip" "nginx_nat_gateway" {
-  vpc = true
+  domain = "vpc"
   tags = {
-    Name  = "nginx_nat_gateway_eip"
+    Name  = format("%s-nginx_nat_gateway_eip", var.prefix)
     UK-SE = "arch"
   }
 }
@@ -77,7 +74,7 @@ resource "aws_nat_gateway" "nginx" {
   subnet_id     = module.vpc.public_subnets[1]
 
   tags = {
-    Name  = "nginx_nat_gateway"
+    Name  = format("%s-nginx_nat_gateway", var.prefix)
     UK-SE = "arch"
   }
 }
@@ -86,4 +83,51 @@ resource "aws_route" "internal" {
   route_table_id         = module.vpc.private_route_table_ids[0]
   destination_cidr_block = "0.0.0.0/0"
   nat_gateway_id         = aws_nat_gateway.nginx.id
+}
+
+resource "aws_iam_role_policy" "nginx" {
+  name = "${var.prefix}nginx"
+  role = aws_iam_role.nginx.id
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "ec2:DescribeInstances",
+        "ec2:DescribeTags",
+        "autoscaling:DescribeAutoScalingGroups"
+      ],
+      "Effect": "Allow",
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role" "nginx" {
+  name = "${var.prefix}nginx"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_instance_profile" "nginx" {
+  name = "${var.prefix}nginx"
+  role = aws_iam_role.nginx.name
 }
