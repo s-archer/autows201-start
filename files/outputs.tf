@@ -20,7 +20,7 @@ output "f5_vs1" {
   value = [aws_eip.public-vs1.private_ip, aws_eip.public-vs1.public_ip]
 }
 output "f5_vs1_uri" {
-  value = "http://${aws_eip.public-vs1.public_ip}"
+  value = "https://${aws_eip.public-vs1.public_ip}"
 }
 output "f5_external_self" {
   value = aws_network_interface.public.private_ip
