@@ -1,0 +1,3 @@
+tenant_name = "as3-day2"
+access_key_id     = "my-access-key"
+secret_access_key = "my-secret-access-key"

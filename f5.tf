@@ -11,7 +11,7 @@ resource "aws_network_interface" "public" {
 }
 
 resource "aws_network_interface" "private" {
-  subnet_id   = module.vpc.private_subnets[0]
-  private_ips = ["10.0.3.10"]
+  subnet_id       = module.vpc.private_subnets[0]
+  private_ips     = ["10.0.3.10"]
   security_groups = [aws_security_group.public.id]
 }
