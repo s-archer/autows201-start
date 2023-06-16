@@ -54,7 +54,7 @@ resource "random_string" "password" {
 resource "aws_instance" "f5" {
 
   ami           = data.aws_ami.f5_ami.id
-  instance_type = "t2.medium"
+  instance_type = "t3.large"
   key_name      = aws_key_pair.demo.key_name
   user_data     = templatefile("../templates/user_data_json.tpl", {
     hostname        = "mybigip.f5.com",
