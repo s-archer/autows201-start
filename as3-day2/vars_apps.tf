@@ -12,6 +12,8 @@
 #   "<AWS 'Name' tag value to identify pool member servers>"
 # ]
 
+# note that TLS keys are just a demo self-signed keys, so not an exposure risk.
+
 variable "app_list" {
   description = "list of applications to be deployed onto shared VIP"
   default = [
