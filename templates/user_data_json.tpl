@@ -138,7 +138,7 @@ cat << 'EOF' > /config/cloud/runtime-init-conf.yaml
     "post_onboard_enabled": []
 }
 EOF
-
+sleep 60
 curl https://cdn.f5.com/product/cloudsolutions/f5-bigip-runtime-init/v1.6.1/dist/f5-bigip-runtime-init-1.6.1-1.gz.run -o f5-bigip-runtime-init-1.6.1-1.gz.run && bash f5-bigip-runtime-init-1.6.1-1.gz.run -- '--cloud aws'
 
 f5-bigip-runtime-init --config-file /config/cloud/runtime-init-conf.yaml
