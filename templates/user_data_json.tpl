@@ -1,15 +1,40 @@
-#!/bin/bash
+#!/bin/bash -x
 
-mkdir -p /config/cloud
+# Send output to log file and serial console
+mkdir -p  /var/log/cloud /config/cloud /var/config/rest/downloads
+LOG_FILE=/var/log/cloud/startup-script.log
+[[ ! -f $LOG_FILE ]] && touch $LOG_FILE || { echo "Run Only Once. Exiting"; exit; }
+npipe=/tmp/$$.tmp
+trap "rm -f $npipe" EXIT
+mknod $npipe p
+tee <$npipe -a $LOG_FILE /dev/ttyS0 &
+exec 1>&-
+exec 1>$npipe
+exec 2>&1
+
+# Run Immediately Before MCPD starts
+/usr/bin/setdb provision.extramb 1000 || true
+/usr/bin/setdb restjavad.useextramb true || true
+/usr/bin/setdb iapplxrpm.timeout 300 || true
+/usr/bin/setdb icrd.timeout 180 || true
+/usr/bin/setdb restjavad.timeout 180 || true
+/usr/bin/setdb restnoded.timeout 180 || true
+
+# Download or Render BIG-IP Runtime Init Config
 cat << 'EOF' > /config/cloud/runtime-init-conf.yaml
 {
+    "controls": {
+        "logLevel": "silly",
+        "logFilename": "/var/log/cloud/bigIpRuntimeInit.log"
+    },
     "runtime_parameters": [],
+    "bigip_ready_enabled": [],
     "pre_onboard_enabled": [
         {
             "name": "provision_rest",
             "type": "inline",
             "commands": [
-                "/usr/bin/setdb provision.extramb 512",
+                "/usr/bin/setdb provision.extramb 1000",
                 "/usr/bin/setdb restjavad.useextramb true"
             ]
         }
@@ -18,19 +43,13 @@ cat << 'EOF' > /config/cloud/runtime-init-conf.yaml
         "install_operations": [
             {
                 "extensionType": "do",
-                "extensionVersion": "1.22.0"
+                "extensionVersion": "1.37.0",
+                "extensionHash": "25dd5256f9fa563e9b2ef9df228d5b01df1aef6b143d7e1c7b9daac822fb91ef"
             },
             {
                 "extensionType": "as3",
-                "extensionVersion": "3.45.0"
-            },
-            {
-                "extensionType": "cf",
-                "extensionVersion": "1.9.0"
-            },
-            {
-                "extensionType": "fast",
-                "extensionVersion": "1.10.0"
+                "extensionVersion": "3.45.0",
+                "extensionHash": "35e7a7efae33a9539e3df52ba594222f93231883f146d4c1fc36737dacc084b8"
             }
         ]
     },
@@ -39,7 +58,7 @@ cat << 'EOF' > /config/cloud/runtime-init-conf.yaml
             {
                 "extensionType": "do",
                 "type": "inline",
-                "value":               { 
+                "value": { 
                     "schemaVersion": "1.15.0",
                     "class": "Device",
                     "async": true,
@@ -108,70 +127,18 @@ cat << 'EOF' > /config/cloud/runtime-init-conf.yaml
                         },
                         "dbvars": {
                             "class": "DbVariables",
-                            "provision.extramb": 512,
+                            "provision.extramb": 1000,
                             "restjavad.useextramb": true
-                        }
-                    }
-                }
-            },
-            {
-                "extensionType": "as3",
-                "type": "inline",
-                "value":                 {
-                    "class": "AS3",
-                    "action": "deploy",
-                    "persist": true,
-                    "declaration": {
-                        "class": "ADC",
-                        "schemaVersion": "3.22.0",
-                        "label": "Sample 1",
-                        "remark": "Simple HTTP Service with Round-Robin Load Balancing",
-                        "demo_tenant": {
-                            "class": "Tenant",
-                            "A1": {
-                                "class": "Application",
-                                "template": "http",
-                                "serviceMain": {
-                                    "class": "Service_HTTP",
-                                    "virtualAddresses": [
-                                        "${ vs1_ip }"
-                                    ],
-                                    "persistenceMethods": [],
-                                    "profileMultiplex": {
-                                        "bigip": "/Common/oneconnect"
-                                    },
-                                    "pool": "web_pool"
-                                },
-                                "web_pool": {
-                                    "class": "Pool",
-                                    "monitors": [
-                                        "http"
-                                    ],
-                                    "members": [
-                                        {
-                                            "servicePort": 80,
-                                            "addressDiscovery": "aws",
-                                            "updateInterval": 1,
-                                            "tagKey": "Name",
-                                            "tagValue": "${asg_tag}",
-                                            "addressRealm": "private",
-                                            "region": "${region}",
-                                            "undetectableAction": "disable",
-                                            "accessKeyId": "${access_key_id}",
-                                            "secretAccessKey": "${secret_access_key}"
-                                        }
-                                    ]
-                                }
-                            }
                         }
                     }
                 }
             }
         ]
-    }
+    },
+    "post_onboard_enabled": []
 }
 EOF
 
-curl https://cdn.f5.com/product/cloudsolutions/f5-bigip-runtime-init/v1.2.1/dist/f5-bigip-runtime-init-1.2.1-1.gz.run -o f5-bigip-runtime-init-1.2.1-1.gz.run && bash f5-bigip-runtime-init-1.2.1-1.gz.run -- '--cloud aws'
+curl https://cdn.f5.com/product/cloudsolutions/f5-bigip-runtime-init/v1.6.1/dist/f5-bigip-runtime-init-1.6.1-1.gz.run -o f5-bigip-runtime-init-1.6.1-1.gz.run && bash f5-bigip-runtime-init-1.6.1-1.gz.run -- '--cloud aws'
 
 f5-bigip-runtime-init --config-file /config/cloud/runtime-init-conf.yaml
