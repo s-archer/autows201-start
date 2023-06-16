@@ -1,5 +1,5 @@
 access_key_id      = "access-key"
-f5_ami_search_name = "F5*BIGIP-16*Best*25Mbps*"
+f5_ami_search_name = "F5*BIGIP-16.1.3.3*Best*25Mbps*"
 prefix             = "my-autows201-tf"
 region             = "eu-west-2"
 secret_access_key  = "my-secret"

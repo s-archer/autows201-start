@@ -85,9 +85,9 @@ resource "aws_instance" "f5" {
     device_index         = 2
   }
 
-  provisioner "local-exec" {
-    command = "while [[ \"$(curl -ski http://${aws_eip.public-vs1.public_ip} | grep -Eoh \"^HTTP/1.1 200\")\" != \"HTTP/1.1 200\" ]]; do sleep 5; done"
-  }
+  # provisioner "local-exec" {
+  #   command = "while [[ \"$(curl -ski http://${aws_eip.public-vs1.public_ip} | grep -Eoh \"^HTTP/1.1 200\")\" != \"HTTP/1.1 200\" ]]; do sleep 5; done"
+  # }
 
   tags = {
     Name     = "${var.prefix}-f5"
